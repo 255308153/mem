@@ -1,0 +1,38 @@
+# Node modules (platform-specific native bindings)
+**/node_modules
+**/.next
+
+# Python
+**/__pycache__
+**/*.pyc
+**/.venv
+**/dist
+**/*.egg-info
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+**/target
+**/*.log
+.*LOG
+logs
+volumes
+
+# Test/Dev
+**/coverage
+**/.pytest_cache
+**/.mypy_cache

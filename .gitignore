@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local generated data, dumps, caches, and reports
+artifacts*/
+.tmp/
+/tmp/
+.hf_cache/
+torchinductor_root/
+README_*_VERSION.md
+lab/evaluation/baselines/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+
+# Node
+node_modules/
+.next/
+coverage/
+
+# Build artifacts
+build/
+dist/
+wheels/
+target/
+*.tgz
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local evaluation/runtime outputs
+.*DATA/
+.*LOG/
+.*RESULT/
+lab/evaluation/**/datasets/
+lab/evaluation/**/results/
+logs/
+*.log
+
+# Result-bearing reports, generated demos, and local test material
+docs/dev/
+docs/*_replay.html
+docs/assets/*_replay.svg
+docs/*_demo.html
+docs/assets/*_demo.svg
+examples/outputs/
+vendor_sdk/examples/outputs/
+core/dataplane/tests/fixtures/
+core/dataplane/tests/perf/
+core/dataplane/tests/test_*_golden.py
+core/dataplane/tests/test_*_output_ratio.py
+goal*.md
+
+# Local service state
+.mcp.json
+.monitoring/
+.pgbouncer/
+nltk_data/
+
+# Editor and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.sesskey
+
+# Docker persistent volumes (local runtime data)
+volumes/
+
+# Evaluation datasets (downloaded, not part of source)
+longmemeval_data/
+
+# Local test scripts (not for upstream)
+scripts/test_lamar_longmemeval.py
