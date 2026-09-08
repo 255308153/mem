@@ -32,49 +32,27 @@ model calls.
 HMS is designed for applications that need memory across sessions without
 placing an entire conversation history into every prompt.
 
-## One-Command Automatic Memory
+## Quick Start
 
-HMS can wrap an existing OpenAI client so each model call automatically:
-
-```text
-user input -> recall relevant memories -> inject context -> call the LLM
-           -> retain the completed user/assistant exchange
-```
-
-Configure the model Base URL, API key, and model in `.env`, then run:
-
-```bash
-bash scripts/run_memory_demo.sh
-```
-
-The script starts PostgreSQL and HMS locally, waits for the memory API, installs
-the local SDK adapter in an isolated environment, and runs a two-turn demo. The
-first turn stores a user preference and project; the second turn recalls both
-without manually calling `retain()` or `recall()`.
-
-The application-side integration is one wrapper call:
+Use the all-in-one local bundle (`core/local-suite`) to run HMS with embedded
+PostgreSQL:
 
 ```python
-from openai import OpenAI
-from hms_litellm import wrap_openai
+from hms import HMSEmbedded
 
-client = wrap_openai(
-    OpenAI(),
-    hms_api_url="http://127.0.0.1:18080",
-    api_key="YOUR_HMS_API_KEY",
-    bank_id="user-alice",
+client = HMSEmbedded(
+    profile="myapp",
+    llm_provider="openai",
+    llm_api_key="your-api-key",
 )
 
-response = client.responses.create(
-    model="gpt-4o-mini",
-    input="What do you remember about my current project?",
-)
+# Use immediately - no manual server management needed
+client.retain(bank_id="alice", content="Alice loves AI")
+results = client.recall(bank_id="alice", query="What does Alice like?")
 ```
 
-`wrap_openai()` supports both `client.responses.create(...)` and
-`client.chat.completions.create(...)`, including streaming. Use a stable,
-per-user `bank_id`; optionally set `session_id` to accumulate one conversation
-as a tracked HMS document.
+Or manage the server explicitly via `start_server()` / `HMSClient`, and use the
+Python SDK (`interface/sdk/python`) for direct API access.
 
 ## Opt-in Image and Video Memory
 
@@ -116,16 +94,13 @@ was observed.
 ```text
 .
 ├── core/
-│   ├── dataplane/
-│   ├── daemon/
-│   └── local-suite/
-├── deploy/
+│   ├── dataplane/     # HMS API server (retain / recall engine)
+│   ├── daemon/        # embedding worker
+│   └── local-suite/   # all-in-one bundle (embedded PostgreSQL)
 ├── docs/
-├── examples/
 ├── interface/
+│   └── sdk/python/    # Python client
 ├── scripts/
-├── vendor_gateway/
-├── vendor_sdk/
 ├── .env.example
 ├── README.md
 └── README.zh-CN.md
@@ -141,18 +116,6 @@ cp .env.example .env
 
 Configure the PostgreSQL connection, core model, retain model, and embedding
 provider. Never commit the populated `.env` file.
-
-Start the local stack:
-
-```bash
-bash scripts/start.sh
-```
-
-Run the smoke test:
-
-```bash
-bash scripts/smoke_test.sh
-```
 
 ## Core Configuration
 
@@ -177,27 +140,6 @@ export HMS_API_MILVUS_URI=./hms_milvus.db  # Milvus Lite
 ```
 
 After enabling Milvus for an existing database, rebuild its projection with `hms-admin rebuild-vector-index --yes`. Milvus Lite is intended for a single HMS process; use Milvus Server or Zilliz Cloud for multi-worker deployments. See [the dataplane README](core/dataplane/README.md#optional-milvus-semantic-index) for all settings and consistency guidance.
-
-## LongMemEval Reproduction
-
-The code-only LongMemEval adapter runs the complete
-`Retain -> Recall -> Answer -> Judge` workflow:
-
-```bash
-cp lab/evaluation/benchmarks/longmemeval/longmemeval.env.example .env.longmemeval
-chmod 600 .env.longmemeval
-# Fill in the database and model credentials, then:
-HMS_ENV_FILE=.env.longmemeval \
-HMS_MAX_INSTANCES=1 \
-HMS_RESULTS_FILENAME=longmemeval-smoke.json \
-bash .aaaSCRIPT/run_benchmark.sh
-```
-
-The runner downloads and verifies a pinned dataset revision. Datasets,
-credentials, retained banks, logs, and generated results are not included in
-the repository. See the
-[LongMemEval reproduction guide](lab/evaluation/benchmarks/longmemeval/README.md)
-for database setup, concurrency, resume behavior, and full-run validation.
 
 ## Security Notes
 

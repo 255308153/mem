@@ -1,10 +1,7 @@
 [tool.uv.workspace]
 members = [
     "core/local-suite",
-    "core/dataplane-full",
     "core/dataplane",
-    "core/local-suite-slim",
-    "lab/evaluation",
     "interface/sdk/python",
     "core/daemon",
 ]

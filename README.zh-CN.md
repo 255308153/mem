@@ -30,47 +30,26 @@
 
 HMS 适用于需要跨 Session 记忆、但不希望每次都把完整历史塞入 Prompt 的应用。
 
-## 一键自动记忆
+## 快速开始
 
-HMS 可以包装现有 OpenAI client，让每次模型调用自动执行：
-
-```text
-用户输入 -> Recall 相关记忆 -> 注入上下文 -> 调用 LLM
-         -> Retain 完整的用户/助手对话
-```
-
-在 `.env` 中配置模型 Base URL、API Key 和 Model 后运行：
-
-```bash
-bash scripts/run_memory_demo.sh
-```
-
-脚本会启动 PostgreSQL 和 HMS，等待 memory API 可用，在隔离环境中安装本地
-SDK adapter，并运行两轮示例。第一轮保存用户偏好和当前项目，第二轮无需手动
-调用 `retain()` 或 `recall()` 即可召回这些信息。
-
-应用侧只需要一次包装：
+使用全家桶本地包（`core/local-suite`）以内嵌 PostgreSQL 驱动 HMS：
 
 ```python
-from openai import OpenAI
-from hms_litellm import wrap_openai
+from hms import HMSEmbedded
 
-client = wrap_openai(
-    OpenAI(),
-    hms_api_url="http://127.0.0.1:18080",
-    api_key="YOUR_HMS_API_KEY",
-    bank_id="user-alice",
+client = HMSEmbedded(
+    profile="myapp",
+    llm_provider="openai",
+    llm_api_key="your-api-key",
 )
 
-response = client.responses.create(
-    model="gpt-4o-mini",
-    input="你记得我当前在做什么项目吗？",
-)
+# 立即使用，无需手动管理服务
+client.retain(bank_id="alice", content="Alice loves AI")
+results = client.recall(bank_id="alice", query="What does Alice like?")
 ```
 
-`wrap_openai()` 支持 `client.responses.create(...)` 和
-`client.chat.completions.create(...)`，也支持 streaming。每个用户应使用稳定且
-独立的 `bank_id`；可以额外设置 `session_id`，把一段会话累计为 HMS 文档。
+也可以使用 `start_server()` / `HMSClient` 显式管理服务，或用 Python SDK
+（`interface/sdk/python`）直接调用 API。
 
 ## 可选的图片与视频记忆
 
@@ -109,16 +88,13 @@ HMS 会为抽取后的记忆保留来源和时间元数据，方便应用检查�
 ```text
 .
 ├── core/
-│   ├── dataplane/
-│   ├── daemon/
-│   └── local-suite/
-├── deploy/
+│   ├── dataplane/     # HMS API 服务器（retain / recall 引擎）
+│   ├── daemon/        # embedding worker
+│   └── local-suite/   # 全家桶包（内嵌 PostgreSQL）
 ├── docs/
-├── examples/
 ├── interface/
+│   └── sdk/python/    # Python 客户端
 ├── scripts/
-├── vendor_gateway/
-├── vendor_sdk/
 ├── .env.example
 ├── README.md
 └── README.zh-CN.md
@@ -134,18 +110,6 @@ cp .env.example .env
 
 配置 PostgreSQL、核心模型、Retain 模型和 Embedding Provider。不要提交填写后的
 `.env` 文件。
-
-启动本地服务：
-
-```bash
-bash scripts/start.sh
-```
-
-运行 Smoke Test：
-
-```bash
-bash scripts/smoke_test.sh
-```
 
 ## 核心配置
 

@@ -13,7 +13,6 @@ artifacts*/
 .hf_cache/
 torchinductor_root/
 README_*_VERSION.md
-lab/evaluation/baselines/
 .coverage
 htmlcov/
 
@@ -44,8 +43,6 @@ target/
 .*DATA/
 .*LOG/
 .*RESULT/
-lab/evaluation/**/datasets/
-lab/evaluation/**/results/
 logs/
 *.log
 
@@ -55,8 +52,6 @@ docs/*_replay.html
 docs/assets/*_replay.svg
 docs/*_demo.html
 docs/assets/*_demo.svg
-examples/outputs/
-vendor_sdk/examples/outputs/
 core/dataplane/tests/fixtures/
 core/dataplane/tests/perf/
 core/dataplane/tests/test_*_golden.py
@@ -84,5 +79,3 @@ volumes/
 # Evaluation datasets (downloaded, not part of source)
 longmemeval_data/
 
-# Local test scripts (not for upstream)
-scripts/test_lamar_longmemeval.py
